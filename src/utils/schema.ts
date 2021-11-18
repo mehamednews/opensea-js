@@ -4,11 +4,7 @@ import { WyvernProtocol } from 'wyvern-js'
 import { HowToCall, ReplacementEncoder, Network } from 'wyvern-js/lib/types'
 import { WyvernAtomicizerContract } from 'wyvern-js/lib/abi_gen/wyvern_atomicizer'
 
-import {
-  AnnotatedFunctionABI,
-  FunctionInputKind,
-  Schema,
-} from 'wyvern-schemas/dist/types'
+import { AnnotatedFunctionABI, FunctionInputKind, Schema } from 'wyvern-schemas/dist/types'
 export { AbiType } from 'wyvern-schemas'
 import { WyvernAsset, OrderSide } from '../types'
 import { proxyAssertABI, proxyABI } from '../abi/Proxy'
@@ -30,10 +26,7 @@ export type Encoder = (schema: Schema<WyvernAsset>, asset: WyvernAsset, address:
 
 export const encodeCall = (abi: AnnotatedFunctionABI, parameters: any[]): string => {
   const inputTypes = abi.inputs.map(i => i.type)
-  return '0x' + Buffer.concat([
-    ethABI.methodID(abi.name, inputTypes),
-    ethABI.rawEncode(inputTypes, parameters),
-  ]).toString('hex')
+  return '0x' + Buffer.concat([ethABI.methodID(abi.name, inputTypes), ethABI.rawEncode(inputTypes, parameters)]).toString('hex')
 }
 
 export const encodeSell: Encoder = (schema, asset, address) => {
@@ -45,10 +38,15 @@ export const encodeSell: Encoder = (schema, asset, address) => {
   }
 }
 
-export type AtomicizedSellEncoder = (schemas: Array<Schema<WyvernAsset>>, assets: WyvernAsset[], address: string, wyvernProtocol: WyvernProtocol, networkName: Network) => CallSpec
+export type AtomicizedSellEncoder = (
+  schemas: Array<Schema<WyvernAsset>>,
+  assets: WyvernAsset[],
+  address: string,
+  wyvernProtocol: WyvernProtocol,
+  networkName: Network
+) => CallSpec
 
 export const encodeAtomicizedSell: AtomicizedSellEncoder = (schemas, assets, address, wyvernProtocol, networkName) => {
-
   const atomicizer = wyvernProtocol.wyvernAtomicizer
 
   const { atomicizedCalldata, atomicizedReplacementPattern } = encodeAtomicizedCalldata(atomicizer, schemas, assets, address, OrderSide.Sell)
@@ -56,14 +54,19 @@ export const encodeAtomicizedSell: AtomicizedSellEncoder = (schemas, assets, add
   return {
     calldata: atomicizedCalldata,
     replacementPattern: atomicizedReplacementPattern,
-    target: WyvernProtocol.getAtomicizerContractAddress(networkName)
+    target: WyvernProtocol.getAtomicizerContractAddress(networkName),
   }
 }
 
-export type AtomicizedBuyEncoder = (schemas: Array<Schema<WyvernAsset>>, assets: WyvernAsset[], address: string, wyvernProtocol: WyvernProtocol, networkName: Network) => CallSpec
+export type AtomicizedBuyEncoder = (
+  schemas: Array<Schema<WyvernAsset>>,
+  assets: WyvernAsset[],
+  address: string,
+  wyvernProtocol: WyvernProtocol,
+  networkName: Network
+) => CallSpec
 
 export const encodeAtomicizedBuy: AtomicizedBuyEncoder = (schemas, assets, address, wyvernProtocol, networkName) => {
-
   const atomicizer = wyvernProtocol.wyvernAtomicizer
 
   const { atomicizedCalldata, atomicizedReplacementPattern } = encodeAtomicizedCalldata(atomicizer, schemas, assets, address, OrderSide.Buy)
@@ -71,7 +74,7 @@ export const encodeAtomicizedBuy: AtomicizedBuyEncoder = (schemas, assets, addre
   return {
     calldata: atomicizedCalldata,
     replacementPattern: atomicizedReplacementPattern,
-    target: WyvernProtocol.getAtomicizerContractAddress(networkName)
+    target: WyvernProtocol.getAtomicizerContractAddress(networkName),
   }
 }
 
@@ -142,8 +145,14 @@ export const encodeDefaultCall: DefaultCallEncoder = (abi, address) => {
  * @param to Destination address
  * @param atomicizer Wyvern Atomicizer instance
  */
-export function encodeAtomicizedTransfer(schemas: Array<Schema<WyvernAsset>>, assets: WyvernAsset[], from: string, to: string, wyvernProtocol: WyvernProtocol, networkName: Network): LimitedCallSpec {
-
+export function encodeAtomicizedTransfer(
+  schemas: Array<Schema<WyvernAsset>>,
+  assets: WyvernAsset[],
+  from: string,
+  to: string,
+  wyvernProtocol: WyvernProtocol,
+  networkName: Network
+): LimitedCallSpec {
   const atomicizer = wyvernProtocol.wyvernAtomicizer
 
   const transactions = assets.map((asset: WyvernAsset, i) => {
@@ -161,12 +170,12 @@ export function encodeAtomicizedTransfer(schemas: Array<Schema<WyvernAsset>>, as
     transactions.map((t: any) => t.address),
     transactions.map((t: any) => t.value),
     transactions.map((t: any) => new BigNumber((t.calldata.length - 2) / 2)), // subtract 2 for '0x', divide by 2 for hex
-    transactions.map((t: any) => t.calldata).reduce((x: string, current: string) => x + current.slice(2), '0x'), // cut off the '0x'
+    transactions.map((t: any) => t.calldata).reduce((x: string, current: string) => x + current.slice(2), '0x') // cut off the '0x'
   )
 
   return {
     calldata: atomicizedCalldata,
-    target: WyvernProtocol.getAtomicizerContractAddress(networkName)
+    target: WyvernProtocol.getAtomicizerContractAddress(networkName),
   }
 }
 
@@ -208,8 +217,13 @@ export function encodeProxyCall(address: string, howToCall: HowToCall, calldata:
 
 // Helpers for atomicizer
 
-function encodeAtomicizedCalldata(atomicizer: WyvernAtomicizerContract, schemas: Array<Schema<WyvernAsset>>, assets: WyvernAsset[], address: string, side: OrderSide) {
-
+function encodeAtomicizedCalldata(
+  atomicizer: WyvernAtomicizerContract,
+  schemas: Array<Schema<WyvernAsset>>,
+  assets: WyvernAsset[],
+  address: string,
+  side: OrderSide
+) {
   const encoder = side === OrderSide.Sell ? encodeSell : encodeBuy
 
   try {
@@ -228,22 +242,27 @@ function encodeAtomicizedCalldata(atomicizer: WyvernAtomicizerContract, schemas:
       transactions.map(t => t.address),
       transactions.map(t => t.value),
       transactions.map(t => new BigNumber((t.calldata.length - 2) / 2)), // subtract 2 for '0x', divide by 2 for hex
-      transactions.map(t => t.calldata).reduce((x, y) => x + y.slice(2)), // cut off the '0x'
+      transactions.map(t => t.calldata).reduce((x, y) => x + y.slice(2)) // cut off the '0x'
     )
 
     const kind = side === OrderSide.Buy ? FunctionInputKind.Owner : undefined
 
-    const atomicizedReplacementPattern = WyvernProtocol.encodeAtomicizedReplacementPattern(transactions.map(t => t.abi), kind)
+    const atomicizedReplacementPattern = WyvernProtocol.encodeAtomicizedReplacementPattern(
+      transactions.map(t => t.abi),
+      kind
+    )
 
     if (!atomicizedCalldata || !atomicizedReplacementPattern) {
       throw new Error(`Invalid calldata: ${atomicizedCalldata}, ${atomicizedReplacementPattern}`)
     }
     return {
       atomicizedCalldata,
-      atomicizedReplacementPattern
+      atomicizedReplacementPattern,
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error({ schemas, assets, address, side })
-    throw new Error(`Failed to construct your order: likely something strange about this type of item. OpenSea has been notified. Please contact us in Discord! Original error: ${error}`)
+    throw new Error(
+      `Failed to construct your order: likely something strange about this type of item. OpenSea has been notified. Please contact us in Discord! Original error: ${error}`
+    )
   }
 }

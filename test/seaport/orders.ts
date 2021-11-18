@@ -118,7 +118,7 @@ suite('seaport: orders', () => {
         waitForHighestBid: true,
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'English auctions must have an expiration time')
     }
 
@@ -136,7 +136,7 @@ suite('seaport: orders', () => {
         waitForHighestBid: true,
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'English auctions must use wrapped ETH')
     }
 
@@ -154,7 +154,7 @@ suite('seaport: orders', () => {
         waitForHighestBid: false,
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'End price must be less than or equal to the start price')
     }
 
@@ -172,7 +172,7 @@ suite('seaport: orders', () => {
         waitForHighestBid: false,
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'Expiration time must be set if order will change in price')
     }
 
@@ -190,7 +190,7 @@ suite('seaport: orders', () => {
         waitForHighestBid: false,
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'Listing time cannot be in the past')
     }
 
@@ -208,7 +208,7 @@ suite('seaport: orders', () => {
         waitForHighestBid: true,
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'Cannot schedule an English auction for the future')
     }
 
@@ -226,7 +226,7 @@ suite('seaport: orders', () => {
         englishAuctionReservePrice: 1
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'Reserve prices may only be set on English auctions')
     }
 
@@ -244,7 +244,7 @@ suite('seaport: orders', () => {
         englishAuctionReservePrice: 1
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'Reserve price must be greater than or equal to the start amount')
     }
   })
@@ -266,7 +266,7 @@ suite('seaport: orders', () => {
         paymentTokenAddress: NULL_ADDRESS
       })
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, 'Offers must use wrapped ETH or an ERC-20 token')
     }
   })
@@ -309,7 +309,7 @@ suite('seaport: orders', () => {
     try {
       await testMatchingNewOrder(order, takerAddress, expirationTime + 100)
       assert.fail()
-    } catch (error) {
+    } catch(error: any) {
       assert.include(error.message, "Buy-side order is set in the future or expired")
     }
   })
